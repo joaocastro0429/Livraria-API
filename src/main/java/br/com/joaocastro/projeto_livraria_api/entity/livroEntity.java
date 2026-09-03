@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "livro")
-public class livroEntity {
+public class LivroEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +26,10 @@ public class livroEntity {
     @Column(name = "start_date")
     private LocalDate startDate;
 
-    public livroEntity() {
+    public LivroEntity() {
     }
 
-    public livroEntity(
+    public LivroEntity(
             Long id,
             String name,
             String description,

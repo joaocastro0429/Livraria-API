@@ -3,13 +3,13 @@ package br.com.joaocastro.projeto_livraria_api.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.joaocastro.projeto_livraria_api.dto.livroDto;
-import br.com.joaocastro.projeto_livraria_api.entity.livroEntity;
+import br.com.joaocastro.projeto_livraria_api.dto.LivroDto;
+import br.com.joaocastro.projeto_livraria_api.entity.LivroEntity;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import br.com.joaocastro.projeto_livraria_api.service.livroService;
+import br.com.joaocastro.projeto_livraria_api.service.LivroService;
 
 import java.util.List;
 
@@ -28,25 +28,25 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/livro")
 @Tag(name = "Livros", description = "Operações para cadastrar, consultar, atualizar e excluir livros")
-public class livroController {
+public class LivroController {
 
-    private final livroService livroService;
+    private final LivroService livroService;
 
-    public livroController(livroService livroService) {
+    public LivroController(LivroService livroService) {
         this.livroService = livroService;
     }
 
     @PostMapping
     @Operation(summary = "Cadastrar livro", description = "Cadastra um novo livro")
     @ApiResponse(responseCode = "200", description = "Livro cadastrado com sucesso")
-    public livroDto createLivro(@RequestBody livroDto dto) {
+    public LivroDto createLivro(@RequestBody LivroDto dto) {
         return livroService.createLivro(dto);
     }
 
     @GetMapping
     @Operation(summary = "Listar livros", description = "Retorna todos os livros cadastrados")
     @ApiResponse(responseCode = "200", description = "Livros encontrados")
-    public List<livroEntity> buscarLivro() {
+    public List<LivroEntity> buscarLivro() {
         return livroService.buscarLivro();
     }
 
@@ -56,7 +56,7 @@ public class livroController {
             @ApiResponse(responseCode = "200", description = "Livro encontrado"),
             @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     })
-    public livroEntity buscarLivroPorId(@PathVariable Long id) {
+    public LivroEntity buscarLivroPorId(@PathVariable Long id) {
         return livroService.buscarLivroPorId(id);
     }
 
@@ -66,7 +66,7 @@ public class livroController {
             @ApiResponse(responseCode = "200", description = "Livro atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     })
-    public livroEntity atualizarLivro(@PathVariable Long id, @RequestBody livroDto dto) {
+    public LivroEntity atualizarLivro(@PathVariable Long id, @RequestBody LivroDto dto) {
         return livroService.atualizarLivro(id, dto);
     }
 

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Dados utilizados para cadastrar ou atualizar um livro")
-public class livroDto {
+public class LivroDto {
 
     @Schema(description = "Nome do livro", example = "Java para iniciantes")
     private String name;
@@ -19,10 +19,10 @@ public class livroDto {
     @Schema(description = "Data de início", example = "2026-09-02")
     private LocalDate startDate;
 
-    public livroDto() {
+    public LivroDto() {
     }
 
-    public livroDto(
+    public LivroDto(
             String name,
             String description,
             Integer duration,

@@ -6,21 +6,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import br.com.joaocastro.projeto_livraria_api.dto.livroDto;
-import br.com.joaocastro.projeto_livraria_api.entity.livroEntity;
-import br.com.joaocastro.projeto_livraria_api.repository.livroRepository;
+import br.com.joaocastro.projeto_livraria_api.dto.LivroDto;
+import br.com.joaocastro.projeto_livraria_api.entity.LivroEntity;
+import br.com.joaocastro.projeto_livraria_api.repository.LivroRepository;
 
 @Service
-public class livroService {
+public class LivroService {
 
-    private final livroRepository livroRepository;
+    private final LivroRepository livroRepository;
 
-    public livroService(livroRepository livroRepository) {
+    public LivroService(LivroRepository livroRepository) {
         this.livroRepository = livroRepository;
     }
 
-    public livroDto createLivro(livroDto dto) {
-        livroEntity livro = new livroEntity(
+    public LivroDto createLivro(LivroDto dto) {
+        LivroEntity livro = new LivroEntity(
                 null,
                 dto.getName(),
                 dto.getDescription(),
@@ -29,9 +29,9 @@ public class livroService {
 
         );
 
-        livroEntity livroSalvo = livroRepository.save(livro);
+        LivroEntity livroSalvo = livroRepository.save(livro);
 
-        return new livroDto(
+        return new LivroDto(
                 livroSalvo.getName(),
                 livroSalvo.getDescription(),
                 livroSalvo.getDuration(),
@@ -39,17 +39,17 @@ public class livroService {
 
     }
     
-    public List<livroEntity> buscarLivro() {
+    public List<LivroEntity> buscarLivro() {
         return livroRepository.findAll();
     }
 
-    public livroEntity buscarLivroPorId(Long id) {
+    public LivroEntity buscarLivroPorId(Long id) {
         return livroRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado"));
     }
 
-    public livroEntity atualizarLivro(Long id, livroDto dto) {
-        livroEntity livro = buscarLivroPorId(id);
+    public LivroEntity atualizarLivro(Long id, LivroDto dto) {
+        LivroEntity livro = buscarLivroPorId(id);
 
         livro.setName(dto.getName());
         livro.setDescription(dto.getDescription());
@@ -60,7 +60,7 @@ public class livroService {
     }
 
     public void excluirLivro(Long id) {
-        livroEntity livro = buscarLivroPorId(id);
+        LivroEntity livro = buscarLivroPorId(id);
         livroRepository.delete(livro);
     }
 }
