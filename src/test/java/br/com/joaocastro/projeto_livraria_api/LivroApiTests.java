@@ -126,4 +126,38 @@ class LivroApiTests {
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/livro/abc")).andExpect(status().isBadRequest());
     }
+
+    @Test void missingAndNullRequiredFieldsAreRejected() throws Exception {
+        for (String body : new String[] {"{}", "{\"name\":null,\"author\":null}"}) {
+            mvc.perform(post("/livro").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.name").exists())
+                    .andExpect(jsonPath("$.errors.author").exists());
+        }
+        assertEquals(0, repository.count());
+    }
+
+    @Test void oversizedFieldsAreRejectedWithoutSaving() throws Exception {
+        String body = """
+                {"name":"%s","author":"%s","description":"%s"}
+                """.formatted("N".repeat(201), "A".repeat(201), "D".repeat(2001));
+        mvc.perform(post("/livro").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.name").exists())
+                .andExpect(jsonPath("$.errors.author").exists())
+                .andExpect(jsonPath("$.errors.description").exists());
+        assertEquals(0, repository.count());
+    }
+
+    @Test void maximumFieldLengthsCanBePersisted() throws Exception {
+        String body = """
+                {"name":"%s","author":"%s","description":"%s"}
+                """.formatted("N".repeat(200), "A".repeat(200), "D".repeat(2000));
+        String location = mvc.perform(post("/livro").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andReturn().getResponse().getHeader("Location");
+        mvc.perform(get(location)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("N".repeat(200)))
+                .andExpect(jsonPath("$.author").value("A".repeat(200)))
+                .andExpect(jsonPath("$.description").value("D".repeat(2000)));
+    }
 }

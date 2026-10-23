@@ -38,12 +38,14 @@ public class LivroController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar livro por ID")
-    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Livro encontrado"),
+            @ApiResponse(responseCode = "404", description = "Livro não encontrado")})
     public LivroResponse buscarLivroPorId(@PathVariable Long id) { return livroService.buscarLivroPorId(id); }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar livro")
-    @ApiResponses({@ApiResponse(responseCode = "400", description = "Dados inválidos"),
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Livro atualizado"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
             @ApiResponse(responseCode = "404", description = "Livro não encontrado")})
     public LivroResponse atualizarLivro(@PathVariable Long id, @Valid @RequestBody LivroDto dto) {
         return livroService.atualizarLivro(id, dto);

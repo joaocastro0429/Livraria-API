@@ -103,9 +103,9 @@ bash mvnw verify
 # Windows: .\mvnw.cmd verify
 ```
 
-Não é necessário iniciar PostgreSQL ou Docker para testar. O perfil `test` usa H2 em memória e não altera o banco de desenvolvimento. Os testes de integração exercitam controller, validação, service e repository: CRUD, ID inexistente, entradas inválidas e preservação dos dados após atualização rejeitada. O H2 não substitui uma validação específica de compatibilidade com PostgreSQL.
+Não é necessário iniciar PostgreSQL ou Docker para testar. O perfil `test` usa H2 em memória e não altera o banco de desenvolvimento. Os testes de integração exercitam controller, validação, service e repository: CRUD, ID inexistente, entradas inválidas e preservação dos dados após atualização rejeitada. Para validar também o banco do projeto, o CI repete a suíte com PostgreSQL 16 em um serviço temporário e isolado, sem acesso ao banco de desenvolvimento. Os testes recriam apenas as tabelas desse banco de teste.
 
-O workflow `.github/workflows/ci.yml` executa `verify` em pushes e pull requests. O resultado da execução fica na aba Actions.
+O workflow `.github/workflows/ci.yml` executa `verify` em dois jobs (H2 e PostgreSQL) em pushes e pull requests. O resultado da execução fica na aba Actions.
 
 ## Mudança em relação ao modelo anterior
 
@@ -115,4 +115,4 @@ No ambiente de estudo, `spring.jpa.hibernate.ddl-auto=update` adiciona as novas 
 
 ## Escopo e evolução
 
-Projeto de estudo, sem autenticação, paginação, empréstimos ou controle de estoque. Não exponha esta API publicamente como serviço de produção. Próximas evoluções possíveis: paginação, migrações versionadas e testes com PostgreSQL.
+Projeto de estudo, sem autenticação, paginação, empréstimos ou controle de estoque. Não exponha esta API publicamente como serviço de produção. Próximas evoluções possíveis: paginação e migrações versionadas.
