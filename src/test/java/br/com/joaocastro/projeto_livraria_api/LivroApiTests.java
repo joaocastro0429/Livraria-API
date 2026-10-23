@@ -79,7 +79,9 @@ class LivroApiTests {
 
     @Test void invalidNameAndAuthorAreRejectedWithoutSaving() throws Exception {
         mvc.perform(post("/livro").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"  ",\"author\":\"\"}"))
+                        .content("""
+                                {"name":"  ","author":""}
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.name").exists())
                 .andExpect(jsonPath("$.errors.author").exists());
