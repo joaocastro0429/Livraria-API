@@ -1,67 +1,24 @@
 package br.com.joaocastro.projeto_livraria_api.dto;
 
 import java.time.LocalDate;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Dados utilizados para cadastrar ou atualizar um livro")
-public class LivroDto {
-
-    @Schema(description = "Nome do livro", example = "Java para iniciantes")
-    private String name;
-
-    @Schema(description = "Descrição do livro", example = "Introdução à linguagem Java")
-    private String description;
-
-    @Schema(description = "Duração em minutos", example = "120")
-    private Integer duration;
-
-    @Schema(description = "Data de início", example = "2026-09-02")
-    private LocalDate startDate;
-
-    public LivroDto() {
-    }
-
-    public LivroDto(
-            String name,
-            String description,
-            Integer duration,
-            LocalDate startDate) {
-        this.name = name;
-        this.description = description;
-        this.duration = duration;
-        this.startDate = startDate;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
+@Schema(description = "Dados para cadastrar ou atualizar um livro")
+public record LivroDto(
+        @NotBlank(message = "O nome é obrigatório")
+        @Size(max = 200, message = "O nome deve ter até 200 caracteres")
+        @Schema(example = "Java para iniciantes") String name,
+        @Size(max = 2000, message = "A descrição deve ter até 2000 caracteres")
+        @Schema(example = "Introdução à linguagem Java") String description,
+        @NotBlank(message = "O autor é obrigatório")
+        @Size(max = 200, message = "O autor deve ter até 200 caracteres")
+        @Schema(example = "João Castro") String author,
+        @Pattern(regexp = "[0-9]{13}", message = "O ISBN deve conter exatamente 13 dígitos")
+        @Schema(description = "ISBN opcional, sem hífens; valida apenas o formato", example = "9780134685991") String isbn,
+        @PastOrPresent(message = "A data de publicação não pode ser futura")
+        @Schema(example = "2020-01-01") LocalDate publicationDate) {
 }

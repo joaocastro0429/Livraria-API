@@ -1,231 +1,118 @@
-# Projeto Livraria API
+# Livraria API
 
-API REST para cadastrar, consultar, atualizar e excluir livros. O projeto foi desenvolvido com Java, Spring Boot, Spring Data JPA e PostgreSQL, com documentação interativa por meio do Swagger/OpenAPI.
+Projeto pessoal de estudo: API REST para cadastrar, consultar, atualizar e excluir livros, com Java 17, Spring Boot, Spring Data JPA e PostgreSQL. O objetivo é praticar persistência, contratos HTTP, validação e testes de integração.
 
-## Tecnologias
+## Tecnologias e organização
 
-- Java 17
-- Spring Boot 4
-- Spring Web MVC
-- Spring Data JPA
-- PostgreSQL 16
-- Docker Compose
-- Maven Wrapper
-- Springdoc OpenAPI e Swagger UI
+- Java 17, Spring Boot 4, Maven Wrapper.
+- PostgreSQL 16 e Docker Compose no desenvolvimento.
+- Spring Data JPA, Bean Validation e Swagger/OpenAPI.
+- JUnit, MockMvc e H2 nos testes.
 
-## Como a aplicação funciona
+Fluxo: Controller -> Service -> Repository -> PostgreSQL. DTOs de entrada e saída separam o contrato HTTP da entidade persistida. O tratamento de erros fica em `exception/ApiExceptionHandler.java`.
 
-O fluxo básico de uma requisição é:
+## Executar localmente
 
-```text
-Cliente HTTP
-    ↓
-Controller → recebe a requisição
-    ↓
-Service → aplica a lógica da aplicação
-    ↓
-Repository → consulta ou modifica o banco
-    ↓
-PostgreSQL
-```
-
-As principais classes estão organizadas assim:
-
-```text
-src/main/java/br/com/joaocastro/projeto_livraria_api/
-├── config/       # Configuração do OpenAPI
-├── controller/   # Endpoints HTTP
-├── dto/          # Dados recebidos pela API
-├── entity/       # Entidades mapeadas no banco
-├── repository/   # Acesso ao banco com Spring Data JPA
-└── service/      # Regras e operações da aplicação
-```
-
-## Pré-requisitos
-
-Antes de executar o projeto, instale:
-
-- Java 17
-- Docker e Docker Compose
-
-Não é necessário instalar o Maven, pois o projeto possui o Maven Wrapper (`mvnw`).
-
-## Executando o projeto
-
-### 1. Inicie o PostgreSQL
-
-Na raiz do projeto, execute:
+Pré-requisitos: JDK 17 e Docker com Compose. Não é necessário instalar Maven.
 
 ```bash
+git clone https://github.com/joaocastro0429/Livraria-API.git
+cd Livraria-API
 docker compose up -d
+# Linux, macOS ou WSL
+bash mvnw spring-boot:run
+# Windows: .\mvnw.cmd spring-boot:run
 ```
 
-O Docker criará um banco com estas configurações:
+A API usa `http://localhost:8080`. O PostgreSQL local usa banco `livraria`, usuário `postgres`, senha de demonstração `admin` e porta `5432`. Esses valores estão em `docker-compose.yml` e `src/main/resources/application.properties`; não são uma configuração de produção.
 
-| Configuração | Valor |
-|---|---|
-| Banco | `livraria` |
-| Usuário | `postgres` |
-| Senha | `admin` |
-| Porta | `5432` |
+Swagger: `http://localhost:8080/swagger-ui.html`.
+OpenAPI JSON: `http://localhost:8080/v3/api-docs`.
 
-Para verificar se o container está ativo:
+Para encerrar o banco preservando os dados: `docker compose down`. Não utilize `down -v` se quiser preservar o volume.
 
-```bash
-docker compose ps
-```
+## Contrato HTTP (versão 2)
 
-### 2. Inicie a API
+| Método | Rota | Resultado |
+| --- | --- | --- |
+| POST | `/livro` | `201 Created`, livro com ID e cabeçalho `Location` |
+| GET | `/livro` | `200 OK`, lista de livros |
+| GET | `/livro/{id}` | `200 OK` ou `404 Not Found` |
+| PUT | `/livro/{id}` | `200 OK`, livro atualizado, ou `404` |
+| DELETE | `/livro/{id}` | `204 No Content` ou `404` |
 
-No Linux, macOS ou WSL:
-
-```bash
-./mvnw spring-boot:run
-```
-
-No Windows (Prompt de Comando ou PowerShell):
-
-```powershell
-.\mvnw.cmd spring-boot:run
-```
-
-A aplicação estará disponível em:
-
-```text
-http://localhost:8080
-```
-
-## Documentação Swagger
-
-Com a aplicação em execução, abra no navegador:
-
-```text
-http://localhost:8080/swagger-ui.html
-```
-
-O documento OpenAPI em JSON fica disponível em:
-
-```text
-http://localhost:8080/v3/api-docs
-```
-
-Na tela do Swagger, expanda um endpoint, clique em **Try it out**, preencha os dados e clique em **Execute**.
-
-## Formato do livro
-
-O corpo usado para cadastrar ou atualizar um livro possui este formato:
+POST e PUT usam o mesmo formato. PUT substitui os dados editáveis, incluindo os opcionais; campos opcionais omitidos ficam nulos.
 
 ```json
 {
   "name": "Java para iniciantes",
   "description": "Introdução à linguagem Java",
-  "duration": 120,
-  "startDate": "2026-09-02"
+  "author": "João Castro",
+  "isbn": "9780134685991",
+  "publicationDate": "2020-01-01"
 }
 ```
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `name` | texto | Nome do livro |
-| `description` | texto | Descrição do livro |
-| `duration` | número inteiro | Duração em minutos |
-| `startDate` | data | Data no formato `AAAA-MM-DD` |
+| Campo | Regra |
+| --- | --- |
+| `name` | Obrigatório, não pode ser vazio; até 200 caracteres |
+| `author` | Obrigatório, não pode ser vazio; até 200 caracteres |
+| `description` | Opcional; até 2000 caracteres |
+| `isbn` | Opcional; exatamente 13 dígitos, sem hífens (validação de formato, sem cálculo de dígito verificador) |
+| `publicationDate` | Opcional; data no formato `AAAA-MM-DD`, sem datas futuras |
 
-O campo `id` é gerado automaticamente pelo banco de dados.
+O ID é gerado pelo banco e retornado nas respostas de cadastro, consulta e atualização. Nome e autor têm espaços das extremidades removidos após a validação. ISBN não é único neste escopo.
 
-## Endpoints
-
-| Método | Rota | Descrição |
-|---|---|---|
-| `POST` | `/livro` | Cadastra um livro |
-| `GET` | `/livro` | Lista todos os livros |
-| `GET` | `/livro/{id}` | Busca um livro pelo ID |
-| `PUT` | `/livro/{id}` | Atualiza um livro |
-| `DELETE` | `/livro/{id}` | Exclui um livro |
-
-### Cadastrar um livro
+### Exemplo de uso
 
 ```bash
-curl -X POST http://localhost:8080/livro \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Java para iniciantes",
-    "description": "Introdução à linguagem Java",
-    "duration": 120,
-    "startDate": "2026-09-02"
-  }'
+curl -i -X POST http://localhost:8080/livro \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Java","author":"João Castro","publicationDate":"2020-01-01"}'
 ```
 
-### Listar todos os livros
+Use o ID retornado (o valor `1` abaixo é apenas um exemplo):
 
 ```bash
 curl http://localhost:8080/livro
-```
-
-### Buscar um livro pelo ID
-
-```bash
 curl http://localhost:8080/livro/1
-```
-
-Se o ID não existir, a API responde com o status HTTP `404 Not Found`.
-
-### Atualizar um livro
-
-```bash
 curl -X PUT http://localhost:8080/livro/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Java e Spring Boot",
-    "description": "Livro atualizado",
-    "duration": 180,
-    "startDate": "2026-09-03"
-  }'
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Java e Spring Boot","author":"João Castro"}'
+curl -i -X DELETE http://localhost:8080/livro/1
 ```
 
-### Excluir um livro
+### Erros de entrada
+
+Dados inválidos retornam `400`, com o campo que precisa de correção:
+
+```json
+{
+  "status": 400,
+  "message": "Dados inválidos",
+  "errors": {"author": "O autor é obrigatório"}
+}
+```
+
+Livro inexistente retorna `404`, mensagem `Livro não encontrado` e `errors: {}`. JSON, data ou identificador malformado retornam `400`.
+
+## Testes e compilação
 
 ```bash
-curl -X DELETE http://localhost:8080/livro/1
+bash mvnw verify
+# Windows: .\mvnw.cmd verify
 ```
 
-## Compilação e testes
+Não é necessário iniciar PostgreSQL ou Docker para testar. O perfil `test` usa H2 em memória e não altera o banco de desenvolvimento. Os testes de integração exercitam controller, validação, service e repository: CRUD, ID inexistente, entradas inválidas e preservação dos dados após atualização rejeitada. Para validar também o banco do projeto, o CI repete a suíte com PostgreSQL 16 em um serviço temporário e isolado, sem acesso ao banco de desenvolvimento. Os testes recriam apenas as tabelas desse banco de teste.
 
-Para verificar a compilação:
+O workflow `.github/workflows/ci.yml` executa `verify` em dois jobs (H2 e PostgreSQL) em pushes e pull requests. O resultado da execução fica na aba Actions.
 
-```bash
-./mvnw compile
-```
+## Mudança em relação ao modelo anterior
 
-Para executar os testes, mantenha o PostgreSQL ativo e execute:
+Esta versão remove `duration` e `startDate` do contrato e adiciona `author`, `isbn` e `publicationDate`, para representar livros. Clientes que enviavam o formato anterior precisam ser atualizados. Não há conversão de duração/data de início em dados bibliográficos.
 
-```bash
-./mvnw test
-```
+No ambiente de estudo, `spring.jpa.hibernate.ddl-auto=update` adiciona as novas colunas sem apagar as antigas. Livros já existentes mantêm ID, nome e descrição; os campos novos ficam nulos até serem preenchidos por PUT. Não exclua o volume do PostgreSQL para atualizar o projeto. Uma implantação de produção exige backup e migração de schema versionada e revisada.
 
-## Configuração do banco
+## Escopo e evolução
 
-A conexão está definida em `src/main/resources/application.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/livraria
-spring.datasource.username=postgres
-spring.datasource.password=admin
-spring.jpa.hibernate.ddl-auto=update
-```
-
-O valor `update` faz o Hibernate criar ou atualizar as tabelas automaticamente durante o desenvolvimento.
-
-## Encerrando o banco
-
-Para parar o container sem excluir os dados:
-
-```bash
-docker compose stop
-```
-
-Para parar e remover o container, preservando o volume do banco:
-
-```bash
-docker compose down
-```
+Projeto de estudo, sem autenticação, paginação, empréstimos ou controle de estoque. Não exponha esta API publicamente como serviço de produção. Próximas evoluções possíveis: paginação e migrações versionadas.
